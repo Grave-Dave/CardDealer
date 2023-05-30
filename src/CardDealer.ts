@@ -64,8 +64,9 @@ export default class CardDealer {
 		this.joker = joker;
 		this.deck = this.createDeck();
 	}
-    // with this function, user can shuffle deck of cards, which is sorted by default
     
+    // with this function, user can shuffle deck of cards, which is sorted by default
+
 	public shuffleDeck() {
 		for (let i = 0; i < this.deck.data.length; i++) {
 			let shuffle = Math.floor(Math.random() * this.deck.data.length);
