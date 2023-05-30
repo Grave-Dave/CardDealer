@@ -1,78 +1,84 @@
+import {removeCard} from "./utils.ts";
+import {Card, CardDeck} from "./types.ts";
 import './style.css'
 
-let deckId: number = 0
-let joker: boolean = false
-
-interface CardDeck {
-    id: number,
-    data: Card[],
-    joker: boolean
-}
-
-interface Card {
-    id: number
-    figure: string,
-    color: string
-}
+let deckId = 0
 
 const Figure: string[] = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
 
-const cardDeck: CardDeck = {
-    id: deckId,
-    data: new Array(52).fill(0).map((el: number, i: number): Card => ({
-        id: i + 1,
-        figure: Figure[i % 13],
-        color: i <= 12 ? 'Clubs' : i <= 25 ? 'Diamods' : i <= 38 ? 'Hearts' : 'Spades'
-    })),
-    joker: joker
-}
+export default class CardDealer {
+    private readonly deckToDeal: number
+    private joker: boolean
 
-function removeCard(id: number[]): void {
-    if (id.length > 1) {
-        for (const el:number of id) {
-            cardDeck.data.forEach(card => card.id === el && cardDeck.data.splice(el, 1))
-        }
-    } else {
-        cardDeck.data.forEach(card => card.id === id[0] && cardDeck.data.splice(id[0], 1))
-    }
-}
-
-class CardDealer {
-    private deckToDeal: number
-
-    constructor(deck: number) {
+    constructor(deck: number, joker: boolean) {
         this.deckToDeal = deck
+        this.joker = joker
     }
 
-    public getRandomCard(): Card {
-        const randomNum: number = Math.floor(Math.random() * 52) + 1
-        removeCard([randomNum])
-        return cardDeck.data[randomNum]
+    public getRandomCard(): Card[] {
+        let cardToDeal: Card
+        const randomNum: number = Math.floor(Math.random() * cardDeck.data.length)
+        cardToDeal = cardDeck.data[randomNum]
+        removeCard([cardToDeal])
+        return [cardToDeal]
     }
 
     public getMultipleCard(): Card[] {
         const cardArray: number[] = []
+        let cardsToDeal: Card[]
         while (cardArray.length < this.deckToDeal) {
-            const randomNum: number = (Math.floor(Math.random() * 52) + 1)
+            const randomNum: number = Math.floor(Math.random() * cardDeck.data.length)
             if (cardArray.indexOf(randomNum) === -1) cardArray.push(randomNum);
-
         }
-        removeCard(cardArray)
-        return cardArray.map(el => cardDeck.data[el - 1])
+        cardsToDeal = cardArray.map(el => cardDeck.data[el])
+        removeCard(cardsToDeal)
+        return cardsToDeal
     }
+
+    public checkJoker(): boolean {
+        return this.joker
+    }
+}
+
+const cards = new CardDealer(10, false)
+
+export const cardDeck: CardDeck = {
+    id: deckId,
+    data: cards.checkJoker()
+        ? new Array(54).fill(0).map((el: number, i: number): Card => ({
+            id: i,
+            figure: i < 52 ? Figure[i % 13] : 'Joker',
+            color: i <= 12 ? 'Clubs' : i <= 25 ? 'Diamonds' : i <= 38 ? 'Hearts' : i <= 51 ? 'Spades' : 'Joker'
+        }))
+        : new Array(52).fill(0).map((el: number, i: number): Card => ({
+            id: i,
+            figure: Figure[i % 13],
+            color: i <= 12 ? 'Clubs' : i <= 25 ? 'Diamonds' : i <= 38 ? 'Hearts' : 'Spades'
+        }))
 
 }
 
-const cards: CardDealer = new CardDealer(5)
+let cardToDisplay : string[]
+let cardsToDisplay : string[]
 
-console.log(cards.getMultipleCard())
-console.log(cards.getRandomCard())
-console.log(cardDeck.data)
+function displayCard() {
+    cardToDisplay = cards.getRandomCard().map(el => `<div class="card">${el.figure}</div>`)
+    render()
+}
+function displayCards() {
+    cardsToDisplay = cards.getMultipleCard().map(el => `<div class="card">${el.figure}</div>`)
+    render()
+}
 
+document.querySelector('.random').addEventListener('click', displayCard)
+document.querySelector('.multiple').addEventListener('click', displayCards)
 
-// document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-//   <div>
-//
-//   </div>
-// `
+function render(){
+
+document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+  <div class="box">  
+        ${cardToDisplay ? cardToDisplay : cardsToDisplay ? cardsToDisplay : 'choose card'}       
+      </div>
+`
+}
 
